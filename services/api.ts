@@ -1,19 +1,10 @@
 import { UserProfile, Scheme, BudgetEntry, SchemeRecommendation, CityCostData, ProfessionSalary, GameProgress, Quest, QuestLevel } from '../types';
-import { auth, db, googleProvider } from './firebase';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged,
-  User as FirebaseUser
-} from 'firebase/auth';
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc
-} from 'firebase/firestore';
+
+// JSON Server base URL
+const API_BASE_URL = 'http://localhost:3001';
+
+// Current user state
+let currentUser: UserProfile | null = null;
 
 // Mock data for schemes, budget, etc. (keeping these as they are not user-specific auth)
 
@@ -206,12 +197,12 @@ const MOCK_QUESTS: Quest[] = [
 export const authService = {
   login: async (email: string, password: string): Promise<UserProfile | null> => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
-      // Fetch user profile from Firestore
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-      if (userDoc.exists()) {
-        return userDoc.data() as UserProfile;
+      const response = await fetch(`${API_BASE_URL}/users?email=${email}&password=${password}`);
+      const users = await response.json();
+      if (users.length > 0) {
+        currentUser = users[0];
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        return currentUser;
       }
       return null;
     } catch (error) {
@@ -221,51 +212,18 @@ export const authService = {
   },
 
   loginWithGoogle: async (): Promise<UserProfile | null> => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const firebaseUser = result.user;
-      // Check if user profile exists in Firestore
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-      if (userDoc.exists()) {
-        return userDoc.data() as UserProfile;
-      } else {
-        // Create new user profile for Google sign-in
-        const newUser: UserProfile = {
-          id: firebaseUser.uid,
-          name: firebaseUser.displayName || 'User',
-          email: firebaseUser.email || '',
-          age: 0, // Will be updated later
-          profession: '',
-          city: '',
-          income: 0,
-          financialGoal: 'Early Retirement',
-          badges: ['Newbie Navigator'],
-          level: 1,
-          gameProgress: {
-            level: 1,
-            xp: 0,
-            coins: 0,
-            unlockedQuests: ['business-quest-1'],
-            completedLevels: {},
-          },
-        } as UserProfile;
-        await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
-        return newUser;
-      }
-    } catch (error) {
-      console.error('Google login error:', error);
-      return null;
-    }
+    // For now, redirect to Google OAuth or simulate
+    // This would need proper OAuth implementation
+    console.log('Google login not implemented yet');
+    return null;
   },
 
   register: async (userData: Omit<UserProfile, 'id' | 'badges' | 'level' | 'gameProgress'> & { password: string }): Promise<UserProfile | null> => {
     try {
       const { password, ...userDataWithoutPassword } = userData;
-      const userCredential = await createUserWithEmailAndPassword(auth, userData.email, password);
-      const firebaseUser = userCredential.user;
       const newUser: UserProfile = {
         ...userDataWithoutPassword,
-        id: firebaseUser.uid,
+        id: Date.now().toString(),
         badges: ['Newbie Navigator'],
         level: 1,
         gameProgress: {
@@ -276,8 +234,21 @@ export const authService = {
           completedLevels: {},
         }
       };
-      await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
-      return newUser;
+
+      const response = await fetch(`${API_BASE_URL}/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...newUser, password }),
+      });
+
+      if (response.ok) {
+        currentUser = newUser;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        return newUser;
+      }
+      return null;
     } catch (error) {
       console.error('Registration error:', error);
       return null;
@@ -285,30 +256,37 @@ export const authService = {
   },
 
   logout: async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+    currentUser = null;
+    localStorage.removeItem('currentUser');
   },
 
   isAuthenticated: (): boolean => {
-    return auth.currentUser !== null;
+    return currentUser !== null || !!localStorage.getItem('currentUser');
   },
 
   getCurrentUser: async (): Promise<UserProfile | null> => {
-    const firebaseUser = auth.currentUser;
-    if (firebaseUser) {
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-      if (userDoc.exists()) {
-        return userDoc.data() as UserProfile;
-      }
+    if (currentUser) return currentUser;
+
+    const stored = localStorage.getItem('currentUser');
+    if (stored) {
+      currentUser = JSON.parse(stored);
+      return currentUser;
     }
     return null;
   },
 
-  onAuthStateChanged: (callback: (user: FirebaseUser | null) => void) => {
-    return onAuthStateChanged(auth, callback);
+  onAuthStateChanged: (callback: (user: UserProfile | null) => void) => {
+    // Simple implementation - in a real app this would listen to auth changes
+    const checkAuth = () => {
+      const user = currentUser || JSON.parse(localStorage.getItem('currentUser') || 'null');
+      callback(user);
+    };
+
+    // Check immediately
+    checkAuth();
+
+    // Return unsubscribe function
+    return () => {};
   }
 };
 
@@ -321,12 +299,22 @@ export const userService = {
     throw new Error('User not authenticated');
   },
   updateProfile: async (profile: UserProfile): Promise<UserProfile> => {
-    const firebaseUser = auth.currentUser;
-    if (firebaseUser) {
-      await updateDoc(doc(db, 'users', firebaseUser.uid), { ...profile });
-      return profile;
+    if (profile.id) {
+      const response = await fetch(`${API_BASE_URL}/users/${profile.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profile),
+      });
+
+      if (response.ok) {
+        currentUser = profile;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        return profile;
+      }
     }
-    throw new Error('User not authenticated');
+    throw new Error('User not authenticated or update failed');
   }
 };
 
@@ -407,13 +395,25 @@ export const cityService = {
 
 export const gameService = {
   getAllQuests: async (): Promise<Quest[]> => {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    return MOCK_QUESTS;
+    try {
+      const response = await fetch(`${API_BASE_URL}/quests`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching quests:', error);
+      return MOCK_QUESTS; // Fallback to mock data
+    }
   },
 
   getQuestById: async (questId: string): Promise<Quest | undefined> => {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    return MOCK_QUESTS.find(q => q.id === questId);
+    try {
+      const response = await fetch(`${API_BASE_URL}/quests/${questId}`);
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      console.error('Error fetching quest:', error);
+    }
+    return MOCK_QUESTS.find(q => q.id === questId); // Fallback
   },
 
   getGameProgress: async (userId?: string): Promise<GameProgress> => {
@@ -425,14 +425,11 @@ export const gameService = {
   },
 
   updateGameProgress: async (progress: GameProgress, userId?: string): Promise<GameProgress> => {
-    const firebaseUser = auth.currentUser;
-    if (firebaseUser) {
-      const currentUser = await authService.getCurrentUser();
-      if (currentUser) {
-        const updatedUser = { ...currentUser, gameProgress: progress };
-        await updateDoc(doc(db, 'users', firebaseUser.uid), { gameProgress: progress });
-        return progress;
-      }
+    const currentUser = await authService.getCurrentUser();
+    if (currentUser && currentUser.id) {
+      const updatedUser = { ...currentUser, gameProgress: progress };
+      await userService.updateProfile(updatedUser);
+      return progress;
     }
     throw new Error('User not found for game progress update.');
   },

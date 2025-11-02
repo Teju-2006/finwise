@@ -4,7 +4,7 @@ import Dashboard from './components/Dashboard';
 import Signup from './components/Signup'; // New import
 import CursorEffect from './components/CursorEffect'; // New import
 import { authService } from './services/api';
-import { User as FirebaseUser } from 'firebase/auth';
+import { UserProfile } from './types';
 
 type AuthPage = 'login' | 'signup' | 'dashboard';
 
@@ -13,16 +13,17 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = authService.onAuthStateChanged((user: FirebaseUser | null) => {
+    const checkAuth = async () => {
+      const user = await authService.getCurrentUser();
       if (user) {
         setCurrentPage('dashboard');
       } else {
         setCurrentPage('login');
       }
       setIsLoading(false);
-    });
+    };
 
-    return () => unsubscribe();
+    checkAuth();
   }, []);
 
   const handleLoginSuccess = () => {

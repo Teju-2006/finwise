@@ -27,7 +27,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onNavigateToSignup }) => 
         setError('Invalid credentials');
       }
     } catch (err) {
-      setError('An error occurred during login.');
+      setError('An error occurred during login. Please check if the JSON server is running.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -35,21 +35,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onNavigateToSignup }) => 
   };
 
   const handleGoogleLogin = async () => {
-    setIsGoogleLoading(true);
-    setError('');
-    try {
-      const user = await authService.loginWithGoogle();
-      if (user) {
-        onLoginSuccess();
-      } else {
-        setError('Google login failed');
-      }
-    } catch (err) {
-      setError('An error occurred during Google login.');
-      console.error(err);
-    } finally {
-      setIsGoogleLoading(false);
-    }
+    // For now, just show a message since Google login is not implemented
+    setError('Google login not implemented yet. Use email/password login.');
   };
 
   return (

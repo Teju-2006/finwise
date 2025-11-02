@@ -53,7 +53,7 @@ const Signup: React.FC<SignupProps> = ({ onSignupSuccess, onNavigateToLogin }) =
         setError('Registration failed. Please try again.');
       }
     } catch (err) {
-      setError('An error occurred during registration.');
+      setError('An error occurred during registration. Please check if the JSON server is running.');
       console.error(err);
     } finally {
       setIsLoading(false);

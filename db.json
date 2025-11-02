@@ -1,0 +1,105 @@
+{
+  "users": [
+    {
+      "id": "user-123",
+      "email": "test@example.com",
+      "password": "password",
+      "name": "Anika Sharma",
+      "age": 26,
+      "profession": "Software Engineer",
+      "city": "Bengaluru",
+      "income": 75000,
+      "financialGoal": "Early Retirement",
+      "badges": ["Budget Master", "Savings Sprout", "Smart Investor"],
+      "level": 5,
+      "gameProgress": {
+        "level": 1,
+        "xp": 0,
+        "coins": 0,
+        "unlockedQuests": ["business-quest-1"],
+        "completedLevels": {}
+      }
+    }
+  ],
+  "budgetEntries": [
+    { "id": "b1", "category": "Salary", "amount": 75000, "type": "income", "date": "2023-10-01" },
+    { "id": "b2", "category": "Rent", "amount": 18000, "type": "expense", "date": "2023-10-05" },
+    { "id": "b3", "category": "Groceries", "amount": 6000, "type": "expense", "date": "2023-10-07" },
+    { "id": "b4", "category": "Utilities", "amount": 3000, "type": "expense", "date": "2023-10-10" },
+    { "id": "b5", "category": "Transport", "amount": 2500, "type": "expense", "date": "2023-10-12" },
+    { "id": "b6", "category": "Entertainment", "amount": 4000, "type": "expense", "date": "2023-10-15" },
+    { "id": "b7", "category": "Investments", "amount": 15000, "type": "expense", "date": "2023-10-20" },
+    { "id": "b8", "category": "Freelance", "amount": 10000, "type": "income", "date": "2023-10-25" }
+  ],
+  "schemes": [
+    {
+      "name": "Public Provident Fund (PPF)",
+      "interestRate": 7.1,
+      "lockInPeriod": "15 years",
+      "description": "A long-term investment scheme offering tax benefits and guaranteed returns.",
+      "eligibility": ["Indian citizens"]
+    },
+    {
+      "name": "National Pension System (NPS)",
+      "interestRate": 9.0,
+      "lockInPeriod": "Till 60 years",
+      "description": "A voluntary retirement savings scheme for building a retirement corpus.",
+      "eligibility": ["Indian citizens, aged 18-70"]
+    },
+    {
+      "name": "National Savings Certificate (NSC)",
+      "interestRate": 7.7,
+      "lockInPeriod": "5 years",
+      "description": "A fixed-income investment scheme that provides tax savings under Section 80C.",
+      "eligibility": ["Indian citizens"]
+    },
+    {
+      "name": "Kisan Vikas Patra (KVP)",
+      "interestRate": 7.5,
+      "lockInPeriod": "120 months (10 years)",
+      "description": "A small savings scheme that doubles the money invested in a specified period.",
+      "eligibility": ["Adult Indian citizens, Joint accounts also possible"]
+    }
+  ],
+  "cityCostData": [
+    { "city": "Mumbai", "costOfLiving": 45000, "averageSalary": 65000 },
+    { "city": "Delhi", "costOfLiving": 35000, "averageSalary": 55000 },
+    { "city": "Bengaluru", "costOfLiving": 40000, "averageSalary": 70000 },
+    { "city": "Chennai", "costOfLiving": 32000, "averageSalary": 60000 },
+    { "city": "Hyderabad", "costOfLiving": 30000, "averageSalary": 58000 },
+    { "city": "Pune", "costOfLiving": 28000, "averageSalary": 62000 },
+    { "city": "Kolkata", "costOfLiving": 25000, "averageSalary": 50000 },
+    { "city": "Ahmedabad", "costOfLiving": 22000, "averageSalary": 52000 }
+  ],
+  "professionSalaries": [
+    { "profession": "Software Engineer", "averageSalary": 800000 },
+    { "profession": "Doctor", "averageSalary": 1200000 },
+    { "profession": "Teacher", "averageSalary": 400000 },
+    { "profession": "Accountant", "averageSalary": 600000 },
+    { "profession": "Marketing Manager", "averageSalary": 900000 },
+    { "profession": "Data Scientist", "averageSalary": 1000000 },
+    { "profession": "Nurse", "averageSalary": 350000 },
+    { "profession": "Lawyer", "averageSalary": 1100000 }
+  ],
+  "quests": [
+    {
+      "id": "business-quest-1",
+      "title": "Business Literacy Quest",
+      "description": "Learn the fundamentals of business and entrepreneurship",
+      "levels": [
+        {
+          "id": "level-1",
+          "title": "Understanding Business Basics",
+          "content": "Business is the activity of making one's living or making money by producing or buying and selling products or services. It involves planning, organizing, and managing resources to achieve goals.",
+          "questions": [
+            {
+              "question": "What is the primary goal of most businesses?",
+              "options": ["To make profit", "To help people", "To create jobs", "To innovate"],
+              "correctAnswer": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
