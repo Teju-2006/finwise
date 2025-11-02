@@ -1,0 +1,7 @@
+{
+  "name": "FinWise AI Financial Assistant",
+  "description": "An intelligent, interactive web application that demystifies personal finance for young Indian earners by leveraging AI and immersive 3D visualization. Features include Budget Builder, Savings Simulator, Gamified Learning, and a personalized AI assistant.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
